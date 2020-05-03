@@ -22,6 +22,7 @@ use super::{
     transform::{gl_to_px_v3, px_to_gl_v3},
     user_data::UserData,
     visual_debugger::*,
+    render_buffer::RenderBuffer,
 };
 use enumflags2::BitFlags;
 use glam::Vec3;
@@ -30,6 +31,37 @@ use physx_sys::*;
 use std::ops::{Deref, DerefMut};
 use std::ptr::{null, null_mut};
 use std::sync::RwLock;
+
+// Wrapper for PxVisualizationParameter
+#[repr(u32)]
+pub enum VisualizationParameter{
+    Scale = 0u32,
+    WorldAxes = 1u32,
+    BodyAxes = 2u32,
+    BodyMassAxes = 3u32,
+    BodyLinVelocity = 4u32,
+    BodyAngVelocity = 5u32,
+    ContactPoint = 6u32,
+    ContactNormal = 7u32,
+    ContactError = 8u32,
+    ContactForce = 9u32,
+    ActorAxes = 10u32,
+    CollisionAabbs = 11u32,
+    CollisionShapes = 12u32,
+    CollisionAxes = 13u32,
+    CollisionCompounds = 14u32,
+    CollisionFnormals = 15u32,
+    CollisionEdges = 16u32,
+    CollisionStatic = 17u32,
+    CollisionDynamic = 18u32,
+    DeprecatedCollisionPairs = 19u32,
+    JointLocalFrames = 20u32,
+    JointLimits = 21u32,
+    CullBox = 22u32,
+    MbpRegions = 23u32,
+    NumValues = 24u32,
+    ForceDword = 2147483647u32,
+}
 
 pub struct Scene {
     px_scene: RwLock<Option<*mut PxScene>>,
@@ -94,6 +126,32 @@ impl Scene {
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
             )
         })
+    }
+
+    // Get the RenderBuffers for engine specific debug drawing
+    pub fn get_render_buffer(&self) -> RenderBuffer {
+        RenderBuffer::from_ptr(
+            unsafe{
+                PxScene_getRenderBuffer_mut(self.px_scene.write().unwrap().expect("accessing null ptr"))
+            }
+        )
+    }
+
+    pub fn set_visualization_parameter(&mut self, param: VisualizationParameter, value: f32) -> bool {
+        unsafe{
+            PxScene_setVisualizationParameter_mut(
+                self.px_scene.write().unwrap().expect("accessing null ptr"), 
+                param as PxVisualizationParameter::Enum, 
+                value)
+        }
+    }    
+    
+    pub fn get_visualization_parameter(&self, param: VisualizationParameter) -> f32 {
+        unsafe{
+            PxScene_getVisualizationParameter(
+                self.px_scene.read().unwrap().expect("accessing null ptr"), 
+                param as PxVisualizationParameter::Enum)
+        }
     }
 
     pub fn add_capsule_controller(

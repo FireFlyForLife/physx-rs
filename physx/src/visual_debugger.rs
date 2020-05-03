@@ -61,6 +61,22 @@ impl PvdSceneClient {
             )
         }
     }
+
+    pub fn set_scene_flag(&mut self, flag: VisualDebuggerSceneFlag, value: bool) {
+        unsafe {
+            PxPvdSceneClient_setScenePvdFlag_mut(
+                self.ptr,
+                flag as PxPvdSceneFlag::Enum,
+                value
+            )
+        }
+    }
+
+    pub fn get_scene_flags(&mut self) -> BitFlags<VisualDebuggerSceneFlag> {
+        unsafe {
+            BitFlags::from_bits(PxPvdSceneClient_getScenePvdFlags(self.ptr).mBits).expect("Could not marshal bits into Rust-Land!")
+        }
+    }
 }
 
 impl VisualDebugger {

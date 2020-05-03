@@ -128,6 +128,7 @@ pub mod foundation;
 pub mod geometry;
 pub mod heightfield;
 pub mod physics;
+pub mod render_buffer;
 pub mod rigid_actor;
 pub mod rigid_body;
 pub mod rigid_dynamic;
