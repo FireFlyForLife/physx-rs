@@ -129,7 +129,7 @@ impl Scene {
     }
 
     // Get the RenderBuffers for engine specific debug drawing
-    pub fn get_render_buffer(&self) -> RenderBuffer {
+    pub fn get_render_buffer<'a>(&self) -> RenderBuffer<'a> {
         RenderBuffer::from_ptr(
             unsafe{
                 PxScene_getRenderBuffer_mut(self.px_scene.write().unwrap().expect("accessing null ptr"))
